@@ -40,7 +40,7 @@ def connection():
     return data
 
 
-connection()
+# connection()
 
 # translation("kaisi ho")
 

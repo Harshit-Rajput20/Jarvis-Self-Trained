@@ -2,12 +2,36 @@ import random
 import json
 import webbrowser
 import pyautogui
-
+import gtts
+import pygame
+import os
+from bardapi import BardCookies
+import speech_recognition as sr
 
 import torch
-from Body.speak import speak
+# from Body.speak import speak
 from chatbot.model import NeuralNet
 from chatbot.nltk_utils import bag_of_words, tokenize
+ 
+
+def speak(text):
+    tts = gtts.gTTS(text,lang="hi")
+    tts.save("output.mp3")
+
+    print(f"You: {text}.")
+
+    pygame.mixer.init()
+
+    pygame.mixer.music.load("output.mp3")
+    pygame.mixer.music.play()
+
+    while pygame.mixer.music.get_busy():
+        pygame.time.Clock().tick(10)
+
+    pygame.mixer.quit()
+
+    # Clean up the generated audio file
+    os.remove("output.mp3")
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -29,7 +53,17 @@ model.load_state_dict(model_state)
 model.eval()
 
 bot_name = "Alisa"
-print("Let's chat! (type 'quit' to exit)")
+cookie_dict = { 
+               "__Secure-1PSID": "dQheJrZcQ2vx4gXEC1mMZmikJqQVT4TxjhP72GsKAlwRq_y4PEW9M23FHSMyb3BoksCHfQ.",
+               "__Secure-1PSIDTS": "sidts-CjEBNiGH7lvRkQGTREJu3GmC7VnKqrO09btRDskOxMQEZvdAAYzoJAG6zlRY9em1RUCDEAA",
+               "__Secure-1PSIDCC": "ACA-OxPMdzqts_2ZvO4YkDCslSWFsblS8v3FXxIt1BxmwLOlTXvdwF6mxRAuiGuvK5KfU2StVIY"
+               }
+bard = BardCookies(cookie_dict=cookie_dict)
+
+
+def ReplyBrain(question , chat_log = None):
+    Reply = bard.get_answer(question)['content']
+    return Reply
 
 def answer(question):
     
@@ -54,15 +88,39 @@ def answer(question):
                 if tag == intent["tag"]:
                     speak(f"{random.choice(intent['responses'])}")
         else:
-            speak("I am unable to answer this question so i am asking my friend bard")
-            webbrowser.open("https://bard.google.com/chat/5c9eb77ba658617e")
-            import time
-            time.sleep(4)
-            pyautogui.click(x=975, y=985)
-            pyautogui.typewrite(sentence)
-            pyautogui.press('enter')
-            time.sleep(8)
-            pyautogui.click(x=1556, y=364)
+            speak("I am in developing phase so i am asking my friend bard")
+            # speak("recognizing")     
+             
+            
+            # chat_log = None  
+            question =  question.replace('alisha','')
+            # FileLog = open("chatbot/chat_log.txt", "r")
+            # chat_log_template = FileLog.read()
+            # FileLog.close()
+            # if chat_log is None:
+            #     chat_log = chat_log_template
+            # prompt = f'{chat_log}You : {question}\n alisa : '
+                
+             
+            
+            
+            if(len(question)<5):
+                speak("invalid question") 
+            else:  
+                reply = bard.get_answer(question)['content']
+                print("Orognal reply :"+reply)
+                speak("he said"+reply.split(".")[0])
+                # chat_log_template_update =  chat_log_template + f"\nYou : {question}\n Friday : {reply}"
+                # FileLog = open("chatbot/chat_log.txt","w")
+                # FileLog.write(chat_log_template_update)
+                # FileLog.close()  
+                      
+            
+            
+            
+            
+            
+# answer("cricket match between india and aus")
 
             
 

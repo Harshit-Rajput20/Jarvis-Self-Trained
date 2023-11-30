@@ -22,16 +22,22 @@ import cv2
 
 
 
-def search(query):
+def searchGoogle(query):
+    if "search" in query:
+        import wikipedia as googleScrap
+       
+        query = query.replace("search","")
+        query = query.replace("google","")
+        speak("This is what I found on google")
+        print(query)
 
-    content = query.replace('search','')
-    speak('searching' + content)
-    pywhatkit.search(content)
-    time.sleep(5)
-    button_x = 2271
-    button_y = 344
-    pyautogui.click(button_x, button_y)
-    time.sleep(1)
+        try:
+            pywhatkit.search(query)
+            result = googleScrap.summary(query,1)
+            speak(result)
+
+        except:
+            speak("No speakable output available")
     
    
     

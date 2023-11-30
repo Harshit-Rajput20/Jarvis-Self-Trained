@@ -1,5 +1,6 @@
 from Body.speak import speak
- 
+import threading
+
 import speech_recognition as sr
 import os
 import pywhatkit
@@ -12,14 +13,40 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from time import sleep
 from selenium.webdriver.chrome.options import Options
- 
+import subprocess
+  
 import datetime
 import cv2
 import keyboard
 
-from Social_Media.youtube import youtube
-from Social_Media.search import search
+from Social_Media.youtube import searchYoutube
+from Social_Media.search import searchGoogle
 from Social_Media.whatsapp import whatsapp
+from Features.temperature import answerTemp
+
+
+from Features.Calculatenumbers import WolfRamAlpha
+from Features.Calculatenumbers import Calc
+
+from pynput.keyboard import Key,Controller
+
+from time import sleep
+
+keyboard = Controller()
+
+ 
+
+
+def alarm(query):
+    try:
+        timehere = open("Alarmtext.txt", "a")
+        timehere.write(query)
+        timehere.close()
+        
+        subprocess.Popen(["python3", "alarm.py"])
+        
+    except Exception as e:
+        print(f"Error in alarm function: {e}")
 
 def listen():
     r=sr.Recognizer()
@@ -44,12 +71,13 @@ def listen():
 
 import random
 import json
-
+from plyer import notification
 import torch
-
+import speedtest
 from chatbot.model import NeuralNet
 from chatbot.nltk_utils import bag_of_words, tokenize
 from chatbot.chat import answer
+import pygame
 
 
 
@@ -70,7 +98,7 @@ from chatbot.chat import answer
             
 def mainExe():
      
-    speak("I am Alisa")
+    speak("How can i help you")
    
     
     while True:
@@ -78,41 +106,169 @@ def mainExe():
         query = listen().lower()
 
         # query = input("enter the command")        
-        if "hello" in query:
-            speak("Hi! I am Alisa")
         
-        elif "alisa" in query or "alisha" in query:
+        
+        if "alisa" in query or "alisha" in query:
                 print("AI:-" ,query )
                 
                 
-                sentence =  query.replace('alisha','')
-                print(sentence)
-                answer(sentence)
+                question =  query.replace('alisha','')
+                print(question)
+                 
+
+                answer(question)
+                 
+                
                 
              
              
             
-        elif "youtube" in query:
+        elif "youtube" in query or "play" in query:
              
-            youtube()    
+            searchYoutube(query)  
             
+        elif "pause" in query:
+            pyautogui.press("k")
+            speak("video paused")
+        elif "play" in query:
+            pyautogui.press("k")
+            speak("video played")
+        elif "mute" in query:
+            pyautogui.press("m")
+            speak("video muted")
+
         
+        
+        
+        elif "remember that" in query:
+            rememberMessage = query.replace("remember that","")
+            rememberMessage = query.replace("alisa","")
+            speak("You told me to remember that"+rememberMessage)
+            remember = open("Remember.txt","a")
+            remember.write(rememberMessage)
+            remember.close()
+        elif "what do you remember" in query:
+            remember = open("Remember.txt","r")
+            speak("You told me to remember that" + remember.read())
+                    
             
+            
+        elif "calculate" in query:
+            query = query.replace("calculate","")
+            query = query.replace("alisa","")
+            Calc(query)
             
             
         elif "search" in query:
-            search(query)
+               searchGoogle(query)
+            
+        elif "temperature" in query:
+            speak("searching the temperature")
+            answerTemp(query)
+            
+        elif "weather" in query:
+            speak("searching for the weather")
+            answerTemp(query)
+            
+            
+        elif "the current time" in query or "time now"in query or "whats the time" in query or "time" in query:
+            strTime = datetime.datetime.now().strftime("%H:%M")    
+            speak(f"Sir, the time is {strTime}")
              
-                 
+        elif "set an alarm" in query:
+            print("input time example:- 10 and 10 and 10")
+            speak("Set the time")
+            a = input("Please tell the time :- ")
+            alarm(a)
+            speak("Done,sir")       
             
         elif "whatsapp" in query:
             whatsapp()
-             
+            
+        
+        elif "close one tab" in query or "1 tab" in query:
+            speak("closing one tab")
+            pyautogui.hotkey("ctrl","w")
+            speak("tab closed")
+            
+        elif "close 2 tabs" in query or "close two tabs" in query or "close both tabs" in query:
+            speak("closing both the tabs")
+            pyautogui.hotkey("ctrl","w")
+            sleep(0.5)
+            pyautogui.hotkey("ctrl","w")
+            speak("All tabs closed")
+        elif "3 tab" in query or "close all tabs" in query:
+            speak("closing all the tabs")
+            pyautogui.hotkey("ctrl","w")
+            sleep(0.5)
+            pyautogui.hotkey("ctrl","w")
+            sleep(0.5)
+            pyautogui.hotkey("ctrl","w")
+            speak("All tabs closed")
+         
+        elif "schedule my day" in query:
+            tasks = [] #Empty list 
+            speak("Do you want to clear old tasks (Plz speak YES or NO)")
+            query = listen().lower()
+            if "yes" in query:
+                file = open("tasks.txt","w")
+                file.write(f"")
+                file.close()
+                no_tasks = int(input("Enter the no. of tasks :- "))
+                i = 0
+                for i in range(no_tasks):
+                    tasks.append(input("Enter the task :- "))
+                    file = open("tasks.txt","a")
+                    file.write(f"{i}. {tasks[i]}\n")
+                    file.close()
+            elif "no" in query:
+                i = 0
+                no_tasks = int(input("Enter the no. of tasks :- "))
+                for i in range(no_tasks):
+                    tasks.append(input("Enter the task :- "))
+                    file = open("tasks.txt","a")
+                    file.write(f"{i}. {tasks[i]}\n")
+                    file.close()
+
+         
+            elif "show my schedule" in query:
+                file = open("tasks.txt","r")
+                content = file.read()
+                file.close()
+                if not pygame.mixer.get_init():
+                    pygame.mixer.init()
+            
+            # Load and play the music file
+            
+                while pygame.mixer.music.get_busy():
+                    pygame.time.Clock().tick(80) 
+                pygame.mixer.music.load('Notification - Notification.mp3')  
+                pygame.mixer.music.play()
+                pygame.time.wait(10000)   
+
+        # Stop the sound
+                pygame.mixer.music.stop()
+
+                notification.notify(
+                    title = "My schedule :-",
+                    message = content,
+                    timeout = 15
+                    )
          
         elif "terminal" in query:
             speak("opening terminal")
             os.system('gnome-terminal')
             continue
+        
+        # elif "internet speed" in query:
+        #             wifi  = speedtest.Speedtest()
+        #             upload_net = wifi.upload()/1048576 
+        #             download_net = wifi.download()/1048576
+        #             print("Wifi Upload Speed is", upload_net)
+        #             print("Wifi download speed is ",download_net)
+        #             speak(f"Wifi download speed is {download_net}")
+        #             speak(f"Wifi Upload speed is {upload_net}")
+
         
         elif "calendar" in query:
             speak("opening calendar")
@@ -160,7 +316,16 @@ def mainExe():
             
         elif "text editor" in query:
             speak("opening text editor")
-            os.system('gedit')
+            stop_flag = threading.Event()
+            def open_editor(stop_flag):
+                stop_flag.is_set()
+                os.system('gedit')
+                return
+            your_thread = threading.Thread(target=open_editor,args=(stop_flag,))
+            your_thread.start()
+
+# Start the thread
+            
             continue
             
         elif "chat gpt" in query:
@@ -169,13 +334,20 @@ def mainExe():
             
         elif  "shutdown" in query or "shut down" in query:
             speak("shutting down the system ,Good by sir")
-            os.system("sudo poweroff")
+            password = "7775"
+            command = f'echo {password} | sudo -S poweroff'
+            os.system(command)
         elif "backlit" in query or "back lit" in query or "back light" in query or "backlight" in query:
              pyautogui.hotkey('fn', 'f4')
              
         elif "bye" in query:
             speak("Bye sir have a nice day")
-            exit
+            break
+            
+        elif "go to sleep" in query:
+            speak("Ok sir , You can me call anytime")
+            break 
+                
             
 
  

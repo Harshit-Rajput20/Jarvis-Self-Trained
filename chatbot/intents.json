@@ -211,34 +211,7 @@
    "context_set": ""
 },
  
-{"tag": "random",
-  "patterns": [
-    "What's your favorite color?",
-    
-    "What do you dream about?",
-    "Can you dance?",
-    "What's the meaning of life?",
-    "Tell me a secret",
-    "Do you believe in aliens?",
-    "Sing me a song",
-    "What's your superpower?",
-    "Can you time travel?",
-    "Do you like pizza?",
-    "Who is your best friend?",
-    "What's the weather like in your world?",
-    "If you could have any pet, what would it be?",
-    "What's your favorite book?",
-    "Can you cook?",
-    "Tell me something interesting",
-    "What's the weirdest dream you've had?",
-    "Do you believe in ghosts?",
-    "If you were a superhero, what would your name be?"
-  ],
-  "responses": [
-    "I am not programmed for this, please ask an appropriate query."
-  ],
-  "context_set": ""
-},
+
 {
   "tag": "swear",
   "patterns": [
